@@ -58,8 +58,6 @@ exports.run = async function () {
                                 multibar.stop();
                             }
 
-                            // console.log(model)
-
                             console.log("\nGenerating output...")
                             generate();
                             process.exit(0);
@@ -89,9 +87,7 @@ exports.run = async function () {
 }
 
 function addSentence(sentence) {
-    // console.log(`Adding ${scrub(sentence)}`);
     arr = split(scrub(sentence));
-    // console.log(arr)
     for (var w in arr) {
         // add vertex
         if (!model.vertices.includes(arr[w])) {
@@ -102,7 +98,6 @@ function addSentence(sentence) {
 
         // link to start
         if (w == 0) {
-            // console.log(`Linking <START> to ${arr[w]}`)
             let exists = false;
             for (var i in model.edges) {
                 if (model.edges[i].from == model.vertices.indexOf("<START>") && model.edges[i].to == index) {
@@ -117,7 +112,6 @@ function addSentence(sentence) {
 
         // link to end
         if (w == arr.length - 1) {
-            // console.log(`Linking ${arr[w]} to <END>`)
             let exists = false;
             for (var i in model.edges) {
                 if (model.edges[i].from == index && model.edges[i].to == model.vertices.indexOf("<END>")) {
@@ -132,7 +126,6 @@ function addSentence(sentence) {
 
         // link to next
         else {
-            // console.log(`Linking ${arr[w]} to ${arr[Math.trunc(w) + 1]}`)
             if (!model.vertices.includes(arr[Math.trunc(w) + 1])) {
                 model.vertices.push(arr[Math.trunc(w) + 1]);
             }
@@ -187,9 +180,7 @@ function generate() {
     while (index != 1 && index != 0) {
         out = `${out} ${model.vertices[index]}`;
         index = next(index);
-        // count++;
     }
-    // out += model.vertices[1];
     console.log(out);
 }
 
@@ -201,7 +192,6 @@ function next(index) {
             for(c = e.count; c > 0; c--){
                 dist.push(e.to);
             }
-            // console.log(`${e.to} (${model.vertices[e.to]})`)
             ret = e.to;
         }
     }
