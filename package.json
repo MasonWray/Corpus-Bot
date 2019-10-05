@@ -1,0 +1,22 @@
+{
+  "name": "corpus-bot",
+  "version": "0.0.1",
+  "description": "Corpus analysis and replication bot",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MasonWray/Corpus-Bot.git"
+  },
+  "author": "Mason Wray",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MasonWray/Corpus-Bot/issues"
+  },
+  "homepage": "https://github.com/MasonWray/Corpus-Bot#readme",
+  "dependencies": {
+    "cli-progress": "^3.3.1"
+  }
+}
