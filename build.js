@@ -58,8 +58,14 @@ exports.run = async function () {
                                 multibar.stop();
                             }
 
-                            console.log("\nGenerating output...")
-                            generate();
+                            if (!fs.existsSync("./models/")) {
+                                fs.mkdirSync("./models/");
+                            }
+
+                            var fname = `model_${Math.trunc((Math.random() * 1000000000000)).toString(16).substring(0, 6)}.json`;
+                            fs.writeFileSync("./models/" + fname, JSON.stringify(model))
+                            console.log(`Model saved as ${fname}.`)
+                            // console.log(model)
                             process.exit(0);
                         }
                     })
@@ -172,31 +178,4 @@ function Edge(from, to) {
 function Model() {
     this.vertices = ["<START>", "<END>"];
     this.edges = new Array();
-}
-
-function generate() {
-    var out = "";
-    var index = next(0);
-    while (index != 1 && index != 0) {
-        out = `${out} ${model.vertices[index]}`;
-        index = next(index);
-    }
-    console.log(out);
-}
-
-function next(index) {
-    ret = 0;
-    var dist = new Array();
-    for (var e of model.edges) {
-        if (e.from == index) {
-            for(c = e.count; c > 0; c--){
-                dist.push(e.to);
-            }
-            ret = e.to;
-        }
-    }
-    if(dist.length > 0){
-        ret = dist[Math.trunc(Math.random() * dist.length)]
-    }
-    return ret;
 }

@@ -6,6 +6,7 @@ const readline = require('readline').createInterface({
 })
 
 const build = require('./build.js');
+const compose = require("./compose.js");
 
 if (process.argv.length < 3) {
     console.log("Error: no command provided.");
@@ -20,6 +21,10 @@ else {
 
         case "--build":
             build.run();
+            break;
+
+        case "--compose":
+            compose.run();
             break;
 
         default:
