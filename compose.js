@@ -24,7 +24,7 @@ exports.run = function () {
                 if (Math.trunc(choice) < data.length) {
                     console.log(`Generating output from model ${data[Math.trunc(choice)]}\n`);
                     fs.readFile("./models/" + data[Math.trunc(choice)], (err, data) => {
-                        if(err){
+                        if (err) {
                             console.log("Failed to load model.");
                             process.exit(1);
                         }
@@ -32,8 +32,6 @@ exports.run = function () {
                         console.log(generate());
                         process.exit(0);
                     })
-                    // var model = JSON.parse(fs.readFileSync("./models/" + data[Math.trunc(choice)]));
-                    // console.log(generate(model));
                 }
                 else {
                     console.log("Invalid selection!");
