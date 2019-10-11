@@ -10,86 +10,83 @@ exports.run = async function () {
     fs.readdir("./corpus", (err, data) => {
         if (err) {
             console.log(`Failed to read corpus directory: \n ${err}`)
-            process.exit(0);
+            process.exit(1);
         }
-        else {
-            if (data.length < 1) {
-                console.log("No files were found in the corpus directory!");
-                process.exit(0);
+
+        if (data.length < 1) {
+            console.log("No files were found in the corpus directory!");
+            process.exit(1);
+        }
+
+        console.log("Building model...");
+        if (progEnabled) {
+            multibar = new progress.MultiBar({
+                format: '|' + '{bar}' + '| {name} | {percentage}% | {value}/{total} {units}',
+                barCompleteChar: '\u2588',
+                barIncompleteChar: '\u2591',
+                hideCursor: true
+            })
+        }
+
+        var bars = new Array();
+        var streams = new Array();
+        var running = 0;
+        for (var i in data) {
+            const path = "./corpus/" + data[i];
+
+            var size = fs.statSync(path)["size"];
+
+            if (progEnabled) {
+                const bar = multibar.create(size, 0, { name: data[i], units: "Bytes" });
+                bar.total = size;
+                bars.push(bar);
             }
-            else {
-                console.log("Building model...");
+
+            const filestream = fs.createReadStream(path, { highWaterMark: 1, encoding: "utf8" });
+            filestream.index = i;
+            streams.push(filestream);
+            running++;
+
+            streams[i].on('end', function () {
                 if (progEnabled) {
-                    multibar = new progress.MultiBar({
-                        format: '|' + '{bar}' + '| {name} | {percentage}% | {value}/{total} {units}',
-                        barCompleteChar: '\u2588',
-                        barIncompleteChar: '\u2591',
-                        hideCursor: true
-                    })
+                    bars[this.index].update(bars[this.index].total)
                 }
 
-
-                var bars = new Array();
-                var streams = new Array();
-                var running = 0;
-                for (var i in data) {
-                    const path = "./corpus/" + data[i];
-
-                    var size = fs.statSync(path)["size"];
-
+                running--;
+                if (running <= 0) {
                     if (progEnabled) {
-                        const bar = multibar.create(size, 0, { name: data[i], units: "Bytes" });
-                        bar.total = size;
-                        bars.push(bar);
+                        multibar.stop();
                     }
 
-                    const filestream = fs.createReadStream(path, { highWaterMark: 1, encoding: "utf8" });
-                    filestream.index = i;
-                    streams.push(filestream);
-                    running++;
+                    if (!fs.existsSync("./models/")) {
+                        fs.mkdirSync("./models/");
+                    }
 
-                    streams[i].on('end', function () {
-                        if (progEnabled) {
-                            bars[this.index].update(bars[this.index].total)
-                        }
+                    var fname = `model_${Math.trunc((Math.random() * 1000000000000)).toString(16).substring(0, 6)}.json`;
+                    fs.writeFileSync("./models/" + fname, JSON.stringify(model))
+                    console.log(`Model saved as ${fname} with ${model.vertices.length} words and ${model.edges.length} connections from ${data.length} files.`)
+                    process.exit(0);
+                }
+            })
+        }
 
-                        running--;
-                        if (running <= 0) {
-                            if (progEnabled) {
-                                multibar.stop();
-                            }
+        // var sentence = "";
+        var sentences = new Array();
 
-                            if (!fs.existsSync("./models/")) {
-                                fs.mkdirSync("./models/");
-                            }
-
-                            var fname = `model_${Math.trunc((Math.random() * 1000000000000)).toString(16).substring(0, 6)}.json`;
-                            fs.writeFileSync("./models/" + fname, JSON.stringify(model))
-                            console.log(`Model saved as ${fname} with ${model.vertices.length} words and ${model.edges.length} connections from ${data.length} files.`)
-                            process.exit(0);
-                        }
-                    })
+        for (var i in streams) {
+            sentences[streams[i].index] = "";
+            streams[i].on('data', function (chunk) {
+                if (progEnabled) {
+                    bars[this.index].increment();
                 }
 
-                // var sentence = "";
-                var sentences = new Array();
+                sentences[this.index] += chunk;
 
-                for (var i in streams) {
-                    sentences[streams[i].index] = "";
-                    streams[i].on('data', function (chunk) {
-                        if (progEnabled) {
-                            bars[this.index].increment();
-                        }
-
-                        sentences[this.index] += chunk;
-
-                        if (chunk == ".") {
-                            addSentence(sentences[this.index]);
-                            sentences[this.index] = "";
-                        }
-                    })
+                if (chunk == ".") {
+                    addSentence(sentences[this.index]);
+                    sentences[this.index] = "";
                 }
-            }
+            })
         }
     });
 }
