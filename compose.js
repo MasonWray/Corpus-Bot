@@ -21,7 +21,7 @@ exports.run = function () {
             list += "> ";
 
             readline.question(list, (choice) => {
-                if (Math.trunc(choice) < data.length - 1) {
+                if (Math.trunc(choice) < data.length) {
                     console.log(`Generating output from model ${data[Math.trunc(choice)]}\n`);
                     fs.readFile("./models/" + data[Math.trunc(choice)], (err, data) => {
                         if(err){
