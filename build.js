@@ -2,7 +2,8 @@ const fs = require('fs');
 const progress = require('cli-progress');
 var model = new Model();
 
-var progEnabled = true;
+var progEnabled;
+progEnabled = true;
 var multibar;
 
 exports.run = async function () {
@@ -64,26 +65,27 @@ exports.run = async function () {
 
                             var fname = `model_${Math.trunc((Math.random() * 1000000000000)).toString(16).substring(0, 6)}.json`;
                             fs.writeFileSync("./models/" + fname, JSON.stringify(model))
-                            console.log(`Model saved as ${fname}.`)
-                            // console.log(model)
+                            console.log(`Model saved as ${fname} with ${model.vertices.length} words and ${model.edges.length} connections from ${data.length} files.`)
                             process.exit(0);
                         }
                     })
                 }
 
-                var sentence = "";
+                // var sentence = "";
+                var sentences = new Array();
 
                 for (var i in streams) {
+                    sentences[streams[i].index] = "";
                     streams[i].on('data', function (chunk) {
                         if (progEnabled) {
                             bars[this.index].increment();
                         }
 
-                        sentence += chunk;
+                        sentences[this.index] += chunk;
 
                         if (chunk == ".") {
-                            addSentence(sentence);
-                            sentence = "";
+                            addSentence(sentences[this.index]);
+                            sentences[this.index] = "";
                         }
                     })
                 }
